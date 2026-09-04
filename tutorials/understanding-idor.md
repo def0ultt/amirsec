@@ -1,51 +1,301 @@
-# Deep Dive: Insecure Direct Object References (IDOR & BOLA)
+# Kubernetes Fundamentals for Pentesting
 
-Insecure Direct Object References (IDOR), or Broken Object Level Authorization (BOLA), occur when an application provides direct access to objects based on user-supplied input without properly validating that the requesting user owns or has permission to access that object.
+### What is Kubernetes?
 
----
+### &#x20;
 
-## Why IDORs Happen
-Most IDORs arise when developers perform **Authentication** (verifying *who* you are), but fail to perform **Authorization** (verifying *what* you can touch).
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
-```text
-User A (authenticated) ---> Requests /api/user/1002
-                                  │
-                                  ▼
-                         Backend checks:
-                         1. Is User A logged in? (YES)
-                         2. Does User A own ID 1002? (MISSED!)
-                                  │
-                                  ▼
-                         Returns Data for User B!
+
+
+Kubernetes is a platform used by **developers and DevOps engineers to run and manage applications at scale**.
+
+When developers build an application, they usually package it into containers so that it can run consistently across different environments. Running a single container on a server is relatively simple. The problem starts when an application grows.
+
+Imagine you have a web application running in one container. As more users access the application, that single container may no longer have enough resources to handle the traffic. You could manually start additional containers, distribute traffic between them, monitor their health, restart failed containers, and update them whenever you release a new version.
+
+But doing all of this manually becomes difficult very quickly.
+
+This is where Kubernetes becomes useful.
+
+Kubernetes allows developers to **describe how they want their application to run**, while Kubernetes takes care of much of the operational work required to maintain that desired state
+
+### Kubernetes Architecture
+
+<figure><img src=".gitbook/assets/05-Service-mesh-scaled (1).png" alt=""><figcaption></figcaption></figure>
+
+### Pod
+
+**A Pod** is the smallest deployable unit in Kubernetes. It represents one or more containers that run together on the same Kubernetes node.
+
+For most applications, a Pod contains **one container**. For example, if you have a web application packaged as a container, Kubernetes can run that container inside a Pod
+
+<figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+
+You can think of a Pod as a **wrapper around one or more containers**. The container runs the actual application, while the Pod provides the Kubernetes environment around it.
+
+When an application needs to handle more traffic, Kubernetes can run multiple Pods containing the same application:
+
+### Services&#x20;
+
+A **Service** provides a stable way to access a group of Pods over the network.
+
+Because Pods are ephemeral, their IP addresses can change when they are replaced. If another application had to connect directly to a Pod's IP address, the connection could break whenever that Pod was recreated.
+
+A Service solves this problem by providing a **stable network endpoint** and forwarding traffic to the appropriate Pods.
+
+<figure><img src=".gitbook/assets/image (3).png" alt=""><figcaption></figcaption></figure>
+
+A Service uses **labels and selectors** to determine which Pods should receive traffic.
+
+Any matching Pods can receive traffic from that Service.
+
+This means that applications generally communicate with a **Service** instead of depending directly on individual Pod IP addresses.
+
+From a pentesting perspective, Services are important because they help determine **how applications inside the cluster are exposed and how different workloads communicate with each other**.
+
+### Cluster Nodes
+
+A **Node** is a physical or virtual machine that runs workloads in a Kubernetes cluster. These workloads run inside **Pods**, which contain the containers running the actual applications.
+
+A Kubernetes cluster usually has multiple nodes, allowing workloads to be distributed across different machines.
+
+<figure><img src=".gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+
+Each worker node runs several components that allow it to communicate with the **control plane** and run containers:
+
+* **kubelet** — An agent running on each node. It communicates with the control plane and ensures that the containers defined for the node's Pods are running.
+* **kube-proxy** — Handles part of Kubernetes' networking and helps route traffic to the appropriate Pods.
+* **Container runtime** — The software responsible for running containers, such as **containerd** or **CRI-O**.
+
+From a pentesting perspective, the important thing to understand is that a **Node is the machine where your Pods and containers actually run**. If an attacker gains access to a node, the impact can potentially extend beyond a single application or Pod.
+
+### Secrets
+
+Applications often need sensitive information such as **passwords, API keys, tokens, and certificates** to communicate with other services.
+
+Putting these values directly inside application code or container images is unsafe. Kubernetes provides **Secrets** as a way to store and provide sensitive data to applications without hardcoding it into the application itself.
+
+A **Secret** is a Kubernetes object that stores sensitive data as key-value pairs.
+
+```
+apiVersion: v1
+items:
+- apiVersion: v1
+  data:
+    password: c3VwZXJzZWNlcnQxMjM=
+    username: YWRtaW4=
+  kind: Secret
+  metadata:
+    creationTimestamp: "2026-09-04T08:33:50Z"
+    name: my-Secret
+    namespace: default
 ```
 
----
+Pods can then consume a Secret in different ways, most commonly through environment variables or mounted files
 
-## High-Yield Testing Checklist
+<figure><img src=".gitbook/assets/image (5).png" alt=""><figcaption></figcaption></figure>
 
-1. **Parameter Substitution**:
-   - Swap your `id`, `user_id`, `uuid`, or `account_id` with another test account.
-2. **HTTP Verb Tampering**:
-   - If `GET /api/documents/50` is forbidden, test `PUT`, `DELETE`, or `PATCH`.
-3. **Array / JSON Wrapping**:
-   - `{"id": 50}` vs `{"id": [50]}` vs `{"id": {"id": 50}}`.
-4. **Header Manipulation**:
-   - Inspect custom headers like `X-User-ID`, `X-Account-ID`, `X-Tenant-ID`.
-5. **Content-Type Switching**:
-   - Switch from `application/json` to `application/xml` or `application/x-www-form-urlencoded`.
+Secret values in a Kubernetes Secret are commonly represented using **Base64 encoding**.
 
----
+> **Base64 is encoding, not encryption.**
 
-## Defensive Best Practice
-Always resolve the object ID from the authenticated session context rather than trusting client-provided route parameters:
+This means that Base64 alone does not protect the secret from someone who can access the Secret's data. Kubernetes can be configured with additional protections, such as **encryption at rest**, to provide stronger protection for stored secrets.
 
-```python
-# Insecure:
-def get_profile(request, user_id):
-    return db.query(User).filter_by(id=user_id).first()
+Secrets are Kubernetes API resources, which means access to them is controlled by **RBAC permissions**.
 
-# Secure:
-def get_profile(request, user_id):
-    current_user = request.auth.current_user
-    return db.query(User).filter_by(id=user_id, organization_id=current_user.org_id).first()
+For example, a user or ServiceAccount with permission to read Secrets may be able to retrieve sensitive credentials from the cluster.
+
+There is also a special use case called **`imagePullSecrets`**, which allows Kubernetes to use credentials when pulling container images from a private container registry.
+
+From a pentesting perspective,Secrets are particularly important because they may contain **credentials, API keys, tokens, or other sensitive information** that can provide access to other resources.
+
+### kubectl
+
+**`kubectl`** is the command-line tool used to interact with a Kubernetes cluster.
+
+It communicates with the **Kubernetes API Server** and allows users to view and manage Kubernetes resources such as Pods, Services, Deployments, Secrets, and more.
+
+A simple way to think about it is:
+
+<figure><img src=".gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
+
+When you run a command such as:
+
+```bash
+kubectl get pods
 ```
+
+`kubectl` sends a request to the Kubernetes API Server, which returns information about the Pods you are allowed to access.
+
+#### Why is kubectl important?
+
+For developers and DevOps engineers, `kubectl` is one of the main tools used to interact with and manage Kubernetes clusters.
+
+It can be used to:
+
+* View Kubernetes resources
+* Create and modify resources
+* Delete resources
+* View container logs
+* Execute commands inside containers
+* Troubleshoot applications
+
+For a pentester, `kubectl` is also important because it provides a convenient interface for interacting with the Kubernetes API.
+
+However, **what you can actually do with `kubectl` depends on your identity and permissions**. Kubernetes uses authentication and authorization mechanisms such as **Service Accounts and RBAC** to control access to resources.
+
+We'll explore these concepts later.
+
+### Basic kubectl Syntax
+
+The basic structure of a `kubectl` command is:
+
+```bash
+kubectl <command> <resource> [name]
+```
+
+For example:
+
+```bash
+kubectl get pods
+```
+
+means:
+
+> Get the Pods that I am allowed to see.
+
+You can also specify a particular resource:
+
+```bash
+kubectl get pod my-app
+```
+
+#### Commands We'll Use Throughout This Guide
+
+As we learn different Kubernetes resources, we'll also use `kubectl` to interact with them.
+
+**Pods**
+
+List Pods:
+
+```bash
+kubectl get pods
+```
+
+Get more detailed information about a Pod:
+
+```bash
+kubectl get pod <pod-name> -o yaml 
+```
+
+View the logs of a Pod:
+
+```bash
+kubectl logs <pod-name>
+```
+
+Execute a command inside a running container:
+
+```bash
+kubectl exec -it <pod-name> -- /bin/sh
+```
+
+**Services**
+
+List Services:
+
+```bash
+kubectl get services
+```
+
+You can also use the shorter form:
+
+```bash
+kubectl get svc
+```
+
+Get detailed information about a Service:
+
+```bash
+kubectl describe service <service-name>
+```
+
+**Deployments**
+
+List Deployments:
+
+```bash
+kubectl get deployments
+```
+
+Get detailed information:
+
+```bash
+kubectl describe deployment <deployment-name>
+```
+
+**Secrets**
+
+List Secrets:
+
+```bash
+kubectl get secrets
+```
+
+View a specific Secret:
+
+```bash
+kubectl get secret <secret-name>
+```
+
+To view the Secret data:
+
+```bash
+kubectl get secret <secret-name> -o yaml
+```
+
+Remember that Secret values are commonly **Base64-encoded, not encrypted by Base64**. We covered this in the [Secrets](https://app.notion.com/p/Kubernetes-Fundamentals-for-Pentesting-3d15ad6e063880abb134f766d53925ba?pvs=21) section.
+
+**Namespaces**
+
+List namespaces:
+
+```bash
+kubectl get namespaces
+```
+
+You can specify a namespace when querying resources:
+
+```bash
+kubectl get pods -n <namespace>
+```
+
+#### A Useful Command
+
+When learning or pentesting a Kubernetes environment, you will often want to see which resources are available to your current identity:
+
+```bash
+kubectl get pods
+kubectl get services
+kubectl get deployments
+kubectl get secrets
+```
+
+Later, when we discuss **RBAC and permissions**, we can use:
+
+```bash
+kubectl auth can-i --list
+```
+
+This asks the Kubernetes API whether your current identity is allowed to perform different actions.
+
+For now, the main idea to remember is:
+
+> **`kubectl` is the client. The Kubernetes API Server is the interface it communicates with.**
+
+```
+kubectl → Kubernetes API Server → Kubernetes Resources
+```
+
+This relationship will become especially important when we start exploring **Kubernetes enumeration and attacks in Part 2**.
