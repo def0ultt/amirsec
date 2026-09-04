@@ -3,4 +3,4 @@
 In-depth conceptual guides and practical hunting methodologies.
 
 ### Articles
-- [Deep Dive: Insecure Direct Object References (IDOR & BOLA)](understanding-idor.md)
+- [Kubernetes Fundamentals for Pentesting - Part 1](kubernetes-fundamentals-pentesting.md)
