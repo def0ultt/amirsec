@@ -1,0 +1,17 @@
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+site:
+  title: AmirSec
+  structure:
+    - type: space
+      key: space-writeups
+      title: Writeups
+      path: writeups
+      default: true
+      content:
+        directory: ./writeups
+    - type: space
+      key: space-tutorials
+      title: Tutorials
+      path: tutorials
+      content:
+        directory: ./tutorials
