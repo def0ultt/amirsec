@@ -6,7 +6,9 @@ This section contains technical write-ups covering:
 2. **CVE Deep Dives**: Root-cause analysis, proof-of-concept exploits, and patch analysis of public CVEs.
 3. **CTF Challenges**: Walkthroughs of notable web, reverse engineering, and pwn challenges.
 
-### Templates
-- [Bug Bounty Write-up Template](bug-bounty-template.md)
-- [CVE Analysis Template](cve-template.md)
-- [CTF Write-up Template](ctf-template.md)
+## Write-ups
+
+* [Bug Bounty Write-up Template](bug-bounty-template.md)
+* [CVE Analysis Template](cve-template.md)
+* [CTF Write-up Template](ctf-template.md)
+
