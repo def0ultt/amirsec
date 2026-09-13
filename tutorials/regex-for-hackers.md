@@ -30,13 +30,13 @@ For example, if you want to find subdomains under `facebook.com`, instead of sea
 
 This regex can help you find subdomains and endpoints under Facebook domains:
 
-```
+```bash
 /https?:\/\/[a-z0-9\.-]+\.facebook\.com\/([a-z0-9-_]+\/)*v[0-9]+\/
 ```
 
 When you combine a regex with a normal GitHub search operator, you can make the search much more powerful. For example:
 
-```
+```bash
 /https?:\/\/[a-z0-9\.-]+\.facebook\.com\/([a-z0-9-_]+\/)*v[0-9]+\/ AND NOT "WWW"
 ```
 
@@ -46,7 +46,7 @@ Another useful regex I use is:
 
 
 
-```
+```bash
 # Find subdomains containing "api"
 /https?:\/\/([a-z0-9-]{1,}[\.])*api\.([a-z0-9-]{1,}[\.])*facebook\.[a-z\.]+\//
 # Find subdomains that have an API path
@@ -73,13 +73,13 @@ Because my email was not registered, I didn't receive any OTP.
 
 I tried entering an incorrect OTP. The application returned **"Wrong OTP"**, but when I looked at the response, I noticed:
 
-```
+```json
 "status": false
 ```
 
 I tried changing it to:
 
-```
+```json
 "status": true
 ```
 
@@ -89,7 +89,7 @@ This showed me that response manipulation was possible, but I still needed a val
 
 I went back to GitHub and searched for email addresses belonging to the target using this regex:
 
-```
+```json
 /[a-zA-Z0-9._%+-]+\@target\.com/
 ```
 
@@ -167,7 +167,7 @@ window.addEventListener("message", function(event) {
 
 The developer is trying to allow messages only from `https://www.example.com`, but the regex is not anchored.​ An attacker can register a domain such as:​
 
-```
+```bash
 https://www.example.com.attacker.com​​
 ```
 
