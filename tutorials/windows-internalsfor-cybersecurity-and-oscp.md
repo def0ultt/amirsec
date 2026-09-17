@@ -1,16 +1,4 @@
-# Page 1
-
-&#x20;
-
-
-
-Authentication, Authorization and Session Management Anytime we interact with a secure digital system that has different permission roles, we will always have to deal with the following three aspects
-
-* _Authentication_: who are you?
-* _Authorization_: what can you do?
-* _Session Management_: how are information regarding the identity of the user stored and processed while a user is having an authenticated session?
-
-
+# Windows Internalsfor Cybersecurity & OSCP
 
 #### Security Principals and Security Identifier (SID)
 
@@ -138,3 +126,30 @@ This means that a binary compiled for Linux will not normally work on Windows be
 
 <figure><img src=".gitbook/assets/image (18).png" alt=""><figcaption></figcaption></figure>
 
+**On Cross Compilation**
+
+The term **cross compilation** is a technique that is used when we want to compile not for our **current environment** but for a **target environment**.
+
+Let's say for example we're running Linux.
+
+In Linux, the binary format used is the **ELF** format.
+
+What if we want to compile a program that will run on a Windows machine? Since Windows uses a different format, namely the **PE** format, we need to perform **cross-compilation**.
+
+If we want to execute it on a Windows machine, we need to cross-compile it. To do this, we need to install the **x86\_64-w64-mingw32-gcc-win32** compiler.
+
+This can be useful when the target machine has no Internet access and does not have a suitable compiler installed, such as during an OSCP exam.
+
+```
+sudo apt install mingw-w64 
+```
+
+We can then use the following command
+
+```
+ x86_64-w64-mingw32-gcc -static  cross-compile.c -o cross-compile.exe
+```
+
+<figure><img src=".gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
+
+and with this we obtain a **PE32+** that runs on the windows operating system.
