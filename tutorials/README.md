@@ -40,7 +40,7 @@ When you combine a regex with a normal GitHub search operator, you can make the 
 /https?:\/\/[a-z0-9\.-]+\.facebook\.com\/([a-z0-9-_]+\/)*v[0-9]+\/ AND NOT "WWW"
 ```
 
-<figure><img src=".gitbook/assets/image (11).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
 
 Another useful regex I use is:
 
@@ -141,7 +141,7 @@ cat ~/.gf/blacklist.json​
 }​
 ```
 
-<figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (15).png" alt=""><figcaption></figcaption></figure>
 
 ### Find Regex to Find Bugs​ <a href="#id-1007" id="id-1007"></a>
 
@@ -151,7 +151,7 @@ I found this image on one of the blogs I read. I think it really captures what I
 
 <br>
 
-<figure><img src=".gitbook/assets/image (13).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 ​Let’s look at a real-world example of how an incorrectly implemented regex can lead to a security vulnerability. For example, consider this code:​
 

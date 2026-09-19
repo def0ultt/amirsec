@@ -10,7 +10,7 @@ Some of the things I like about this tool:
 * **Cross-compilation is simple** thanks to Go’s toolchain. You can build for **Windows, Linux, and macOS**, across both **x86 and ARM architectures**, from the same codebase.
 * **Completely open source**, so there’s no need for cracked or pirated versions. You can **audit the code, customize it, and extend it**, which makes it especially useful for researchers and security engineers who want to understand or modify how things work internally.
 
-<figure><img src=".gitbook/assets/image (9).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (12).png" alt=""><figcaption></figcaption></figure>
 
 ## Architecture
 

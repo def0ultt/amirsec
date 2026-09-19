@@ -154,7 +154,7 @@ site:target.com (filetype:doc OR filetype:docx OR filetype:pdf OR filetype:rtf O
 
 The idea is to search the target for different types of files that may contain useful or sensitive information.
 
-<figure><img src=".gitbook/assets/image (21).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
 
 **Finding Contact Forms for Blind XSS**
 
@@ -164,7 +164,7 @@ Another useful dork is for finding support-team contact forms that can be tested
 site:target.com intitle:"contact us" | intitle:"get in touch" | intitle:"contact form" | intitle:"reach us" | intitle:"reach out" | intitle:"talk to us" | intitle:"contact our team"
 ```
 
-<figure><img src=".gitbook/assets/image (22).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (25).png" alt=""><figcaption></figcaption></figure>
 
 \
 This searches for different common titles used by contact and support pages, making it easier to find different forms across the target.
@@ -173,4 +173,4 @@ This searches for different common titles used by contact and support pages, mak
 
 If you are targeting a very large website and don’t want to go through hundreds of PDF and XLSX files manually, you can automate the process. You can use [webpaste](https://github.com/xnl-h4ck3r/webpaste) to save the Google search results and URLs. Then, you can pass the collected URLs to an LLM for analysis. This makes the process faster and more efficient, especially when you have a large number of results to review.
 
-<figure><img src=".gitbook/assets/image (23).png" alt=""><figcaption></figcaption></figure>
+<figure><img src=".gitbook/assets/image (26).png" alt=""><figcaption></figcaption></figure>
