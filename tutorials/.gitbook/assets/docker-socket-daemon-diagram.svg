@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-label="Docker CLI connects through the Docker socket to the Docker daemon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5fbff"/><stop offset="1" stop-color="#e8f2f6"/></linearGradient>
+    <linearGradient id="box" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dcecf2"/></linearGradient>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto"><path d="M0 0 L14 7 L0 14 Z" fill="#247ba0"/></marker>
+    <style>
+      .heading { font: 700 28px 'Segoe UI', sans-serif; fill: #143849; }
+      .label { font: 700 22px 'Segoe UI', sans-serif; fill: #143849; }
+      .small { font: 600 17px 'Cascadia Mono', 'Consolas', monospace; fill: #426475; }
+    </style>
+  </defs>
+  <rect width="1200" height="420" fill="url(#bg)"/>
+  <text x="600" y="62" text-anchor="middle" class="heading">Docker socket connection</text>
+
+  <rect x="85" y="145" width="235" height="125" rx="18" fill="url(#box)" stroke="#247ba0" stroke-width="3"/>
+  <path d="M135 187 h135 v52 h-135z" fill="#247ba0"/>
+  <path d="M150 204 l14 10 l-14 10 M172 224 h26" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="202" y="258" text-anchor="middle" class="label">Docker CLI</text>
+
+  <line x1="320" y1="207" x2="445" y2="207" stroke="#247ba0" stroke-width="6" marker-end="url(#arrow)"/>
+
+  <rect x="465" y="125" width="270" height="165" rx="20" fill="#f6c65b" stroke="#c8881e" stroke-width="3"/>
+  <circle cx="600" cy="185" r="31" fill="#fff4d1" stroke="#9e681b" stroke-width="5"/>
+  <path d="M600 154 v62 M569 185 h62" stroke="#9e681b" stroke-width="7" stroke-linecap="round"/>
+  <text x="600" y="247" text-anchor="middle" class="label">Docker socket</text>
+  <text x="600" y="273" text-anchor="middle" class="small">/var/run/docker.sock</text>
+
+  <line x1="735" y1="207" x2="860" y2="207" stroke="#247ba0" stroke-width="6" marker-end="url(#arrow)"/>
+
+  <rect x="880" y="145" width="235" height="125" rx="18" fill="url(#box)" stroke="#0c8585" stroke-width="3"/>
+  <path d="M940 183 h115 v57 h-115z" fill="#0c8585"/>
+  <path d="M925 183 h145 M925 240 h145 M952 168 v15 M980 168 v15 M1008 168 v15 M1036 168 v15" stroke="#0c8585" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="963" cy="211" r="7" fill="#d9f7f1"/><circle cx="989" cy="211" r="7" fill="#d9f7f1"/><circle cx="1015" cy="211" r="7" fill="#d9f7f1"/>
+  <text x="998" y="258" text-anchor="middle" class="label">Docker daemon</text>
+</svg>
