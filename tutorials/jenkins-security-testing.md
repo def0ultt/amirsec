@@ -1,8 +1,10 @@
 # Jenkins Security Testing
 
-Jenkins is a tool that makes it easy to set up a **continuous integration (CI)** or **continuous delivery (CD)** environment. It can work with almost any **programming language** and source code repository through pipelines.
 
-Jenkins can also automate many common development tasks such as building, testing, and deploying applications. It does not remove the need to write scripts for each step, but it makes it easier to connect these steps together and automate the whole process.
+
+<figure><img src=".gitbook/assets/image (40).png" alt=""><figcaption></figcaption></figure>
+
+In this blog, I’ll focus mainly on Jenkins misconfigurations and the different ways they can be discovered and abused during a penetration test. I won’t go deeply into Jenkins as part of a complete CI/CD pipeline or topics such as **supply-chain attacks**, exposed secrets, and attacks against the build process. I may cover these topics later and update the blog as soon as possible.
 
 ### Basic Jenkins Information
 
