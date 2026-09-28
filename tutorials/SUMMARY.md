@@ -1,7 +1,9 @@
 # Table of contents
 
 * [Regex for Hackers](README.md)
-* [Page 1](page-1.md)
+* [Windows Privilege Escalation](windows-privilege-escalation.md)
+* [Docker Container Escape Techniques](docker-container-escape-techniques.md)
+* [Jenkins Security Testing](jenkins-security-testing.md)
 * [Google Dorking for Bug Hunters: Real-World Case Studies](google-dorking-for-bug-hunters-real-world-case-studies.md)
 * [Learn Sliver C2: A Practical Guide](learn-sliver-c2-a-practical-guide.md)
 * [Master Recon for Bug Hunters and Pentesters — Part 1: Shodan & URLScan \&VirusTotal — Advanced Tricks](master-recon-for-bug-hunters-and-pentesters-part-1-shodan-and-urlscan-and-virustotal-advanced-tricks.md)
